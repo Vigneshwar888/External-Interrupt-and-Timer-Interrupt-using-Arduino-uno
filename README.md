@@ -18,11 +18,7 @@ To implement External Interrupt and Timer Interrupt using an Arduino UNO and obs
 - Jumper Wires
 
 # Circuit Diagram
-
----
-<img width="827" height="412" alt="image" src="https://github.com/user-attachments/assets/124fe722-66eb-4c0d-88bf-156973c9e7cb" />
-
----
+<img width="1076" height="593" alt="image" src="https://github.com/user-attachments/assets/627b718e-2384-42d8-aade-b83e65d81e02" />
 
 # Procedure
 
@@ -71,41 +67,74 @@ To implement External Interrupt and Timer Interrupt using an Arduino UNO and obs
 
 # Program
 ```
+volatile bool externalFlag = false;
+volatile bool timerFlag = false;
 
-volatile bool buttonState = false;
-
-void externalInterrupt() {
-  buttonState = true;
-}
-
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-
-  // D2 is the external interrupt pin
+void setup()
+{
+  pinMode(13, OUTPUT);
+  pinMode(12, OUTPUT);
   pinMode(2, INPUT_PULLUP);
 
-  // Trigger when D2 changes from HIGH to LOW
-  attachInterrupt(
-    digitalPinToInterrupt(2),
-    externalInterrupt,
-    FALLING
-  );
+  // External interrupt on INT0 (D2)
+  attachInterrupt(digitalPinToInterrupt(2), externalISR, FALLING);
+
+  // Timer1 setup
+  noInterrupts();
+
+  TCCR1A = 0;
+  TCCR1B = 0;
+
+  // CTC mode
+  TCCR1B |= (1 << WGM12);
+
+  // Prescaler = 1024
+  TCCR1B |= (1 << CS12) | (1 << CS10);
+
+  // 16 MHz / 1024 = 15625 counts/sec
+  // 15625 counts = 1 second
+  OCR1A = 15624;
+
+  // Enable Timer1 Compare Match A interrupt
+  TIMSK1 |= (1 << OCIE1A);
+
+  interrupts();
 }
 
-void loop() {
+void loop()
+{
+  if (externalFlag)
+  {
+    externalFlag = false;
 
-  if (digitalRead(2) == LOW) {
-    digitalWrite(LED_BUILTIN, HIGH);
-  } 
-  else {
-    digitalWrite(LED_BUILTIN, LOW);
+    // External interrupt action
+    digitalWrite(13, !digitalRead(13));
+  }
+
+  if (timerFlag)
+  {
+    timerFlag = false;
+
+    // Timer interrupt action
+    digitalWrite(12, !digitalRead(12));
   }
 }
+
+// External Interrupt Service Routine
+void externalISR()
+{
+  externalFlag = true;
+}
+
+// Timer1 Compare Match Interrupt Service Routine
+ISR(TIMER1_COMPA_vect)
+{
+  timerFlag = true;
+}
 ```
----
-# OUTPUT
-<img width="899" height="1599" alt="WhatsApp Image 2026-09-23 at 12 33 58" src="https://github.com/user-attachments/assets/89be6fe3-6b22-4f7b-a288-aad86d4433af" />
+# Observation
+
+<img width="1173" height="1600" alt="WhatsApp Image 2026-09-24 at 8 18 54 AM" src="https://github.com/user-attachments/assets/4e3da0fd-adb4-403a-87c3-59c867769bb3" />
 
 # Result
 
