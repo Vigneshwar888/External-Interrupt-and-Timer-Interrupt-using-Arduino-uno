@@ -134,7 +134,7 @@ ISR(TIMER1_COMPA_vect)
 ```
 # Observation
 
-<img width="1173" height="1600" alt="WhatsApp Image 2026-09-24 at 8 18 54 AM" src="https://github.com/user-attachments/assets/4e3da0fd-adb4-403a-87c3-59c867769bb3" />
+<img width="899" height="1599" alt="image" src="https://github.com/user-attachments/assets/6ce09414-7456-43ae-9345-dda91ccc5dd4" />
 
 # Result
 
